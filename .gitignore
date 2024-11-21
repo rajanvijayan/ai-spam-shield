@@ -1,0 +1,31 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore build and compiled files
+/node_modules/
+/build/
+/dist/
+
+# Ignore IDE and editor-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore environment-specific files
+.env
+.env.local
+.env.*.local
+
+# Ignore log and backup files
+*.log
+*.bak
+
+# Ignore Composer dependencies
+/vendor/
+.DS_Store
+
+package-lock.json
+composer.lock
+.phpunit.result.cache
