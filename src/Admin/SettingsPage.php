@@ -23,6 +23,9 @@ class SettingsPage {
         register_setting( 'ai_comment_moderator_group', 'cron_schedule_time' );
         register_setting( 'ai_comment_moderator_group', 'api_key' );
         register_setting( 'ai_comment_moderator_group', 'moderator_user' );
+        register_setting( 'ai_comment_moderator_group', 'enable_email_spam_protection' );
+        register_setting( 'ai_comment_moderator_group', 'disable_for_logged_in_users' );
+        register_setting( 'ai_comment_moderator_group', 'disable_for_wp_emails' );
     }
 
     public function create_settings_page() {
@@ -33,6 +36,7 @@ class SettingsPage {
             <!-- Tabs for Basic Settings and API Settings -->
             <h2 class="nav-tab-wrapper">
                 <a href="#basic-settings" class="nav-tab nav-tab-active">Basic Settings</a>
+                <a href="#email-settings" class="nav-tab">Email Settings</a>
                 <a href="#api-settings" class="nav-tab">API Settings</a>
             </h2>
 
@@ -114,6 +118,35 @@ class SettingsPage {
                                     ?>
                                 </select>
                                 <p class="description">Select the user who will moderate comments. Make sure a valid user is selected.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Email Settings Tab -->
+                <div id="email-settings" class="settings-section" style="display:none;">
+                    <h2>Email Settings</h2>
+                    <p>Configure email related settings for better spam protection.</p>
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th scope="row">Enable Email Spam Protection</th>
+                            <td>
+                                <input type="checkbox" name="enable_email_spam_protection" value="1" <?php checked(get_option('enable_email_spam_protection'), 1); ?> />
+                                <p class="description">Enable this to automatically filter spam in emails.</p>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row">Disable Checking for Logged In Users</th>
+                            <td>
+                                <input type="checkbox" name="disable_for_logged_in_users" value="1" <?php checked(get_option('disable_for_logged_in_users'), 1); ?> />
+                                <p class="description">Disable spam checking for users that are logged in.</p>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row">Disable Checking for WordPress Emails</th>
+                            <td>
+                                <input type="checkbox" name="disable_for_wp_emails" value="1" <?php checked(get_option('disable_for_wp_emails'), 1); ?> />
+                                <p class="description">Exclude WordPress system emails like password reset and user registration from spam checking.</p>
                             </td>
                         </tr>
                     </table>
