@@ -17,6 +17,7 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 use AISpamShield\Admin\SettingsPage;
 use AISpamShield\Cron\SpamCheckCron;
 use AISpamShield\Moderation\CommentModerator;
+use AISpamShield\Spam\EmailValidator;
 
 // Initialize the plugin
 function ai_comment_moderator_init() {
@@ -27,5 +28,6 @@ function ai_comment_moderator_init() {
 
     // Initialize comment moderation module
     new CommentModerator();
+    new EmailValidator();
 }
 add_action( 'plugins_loaded', 'ai_comment_moderator_init' );
