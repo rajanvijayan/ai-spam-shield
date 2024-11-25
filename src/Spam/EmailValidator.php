@@ -1,99 +1,61 @@
-<?php
+<?php 
 namespace AISpamShield\Spam;
 
 use AIEngine\AIEngine;
 
-/**
- * Class EmailValidator
- * Handles email validation to detect and log spam activities.
- */
 class EmailValidator {
-    /**
-     * Constructor.
-     * Hooks into the WordPress email sending process to validate emails.
-     */
     public function __construct() {
-        add_action('pre_wp_mail', [$this, 'validateAndLogEmail'], 10, 5);
+        add_action('pre_wp_mail', [$this, 'validateAndLogEmail'], 10, 2);
     }
 
-    /**
-     * Validates and logs the email before sending.
-     * 
-     * @param string $to Recipient email address.
-     * @param string $subject Email subject.
-     * @param string $message Email body/message.
-     * @param mixed $headers Email headers.
-     * @param mixed $attachments Email attachments.
-     * @return bool Returns false if the email is detected as spam, halting the send process.
-     */
-    public function validateAndLogEmail($to, $subject, $message, $headers, $attachments) {
+    public function validateAndLogEmail($to, $mail) {
+        // Logging email details
+        $message = $mail['message'];
+        // Perform spam check
         if ($this->isSpam($message)) {
-            return false; // Stop the email from being sent
+            error_log("Invalid email content detected. Email not sent.");
+            return false; // Optionally, stop the email from sending by modifying the workflow
+        } else {
+            error_log("Email content is valid. Proceeding with sending the email.");
         }
     }
 
-    /**
-     * Checks if the email message is spam.
-     * 
-     * @param string $message The email message to check.
-     * @return bool Returns true if the message is spam, false otherwise.
-     */
     private function isSpam($message) {
         $api_key = get_option('api_key', '');
         if (empty($api_key)) {
-            error_log('API key is missing for spam detection.');
-            return true; // Assume spam if the API key is missing
+            error_log('API key is missing in the AI Comment Moderator plugin settings.');
+            return false; // Consider email as spam if the API key is missing
         }
 
-        // Initialize AI engine with API key and check for spam
+        // Initialize AI engine with API key
         $ai_client = new AIEngine($api_key);
-        $prompt = "Check if this message is spam: $message";
+        $response_mode = get_option('response_mode', 'professional');
+
+        // Assuming the AIEngine class has a method `generateContent` that returns boolean
+        $prompt = "This is post email content: ".$message." Check it is spam or not. If it is spam, return true; otherwise, return false.";
+
         $response_data = $ai_client->generateContent($prompt);
-        
-        // Assume the response_data is returned as a boolean
-        return $response_data;
+
+        return $response_data === "true"; // Adjust based on the actual return type from AIEngine
     }
 }
 
-// Overridden wp_mail function with spam check
+// Ensure the overridden wp_mail function is declared globally and not inside the class
 if (!function_exists('wp_mail')) {
-    /**
-     * Custom wp_mail function.
-     * 
-     * Integrates spam checking before sending an email.
-     *
-     * @param string $to Recipient email address.
-     * @param string $subject Email subject.
-     * @param string $message Email body/message.
-     * @param mixed $headers Email headers.
-     * @param mixed $attachments Email attachments.
-     * @return bool Returns false if the email is flagged as spam, otherwise sends the email.
-     */
     function wp_mail($to, $subject, $message, $headers = '', $attachments = array()) {
-        // Trigger spam check
-        if (!apply_filters('pre_wp_mail', true, $to, $subject, $message, $headers, $attachments)) {
-            return false; // Stop email if flagged as spam
-        }
-        // Send email if not spam
+        // Trigger the pre_wp_mail action before the actual mail sending
+        do_action('pre_wp_mail', $to, $subject, $message, $headers, $attachments);
+
+        // Call the actual wp_mail function logic
+        // Assuming _wp_mail is your actual mail function that sends the email
         return _wp_mail($to, $subject, $message, $headers, $attachments);
     }
 }
 
-// Placeholder for the real wp_mail function
+// Dummy _wp_mail function to simulate WordPress' native wp_mail behavior
 if (!function_exists('_wp_mail')) {
-    /**
-     * Simulates sending an email.
-     * 
-     * This is a placeholder function meant to simulate the actual email sending function.
-     *
-     * @param string $to Recipient email address.
-     * @param string $subject Email subject.
-     * @param string $message Email body/message.
-     * @param mixed $headers Email headers.
-     * @param mixed $attachments Email attachments.
-     * @return bool Simulates successful email send.
-     */
     function _wp_mail($to, $subject, $message, $headers = '', $attachments = array()) {
-        return true; // Simulating email sending
+        // This function would normally handle sending the mail
+        return true; // Simulating a successful mail send
     }
 }
