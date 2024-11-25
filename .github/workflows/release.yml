@@ -1,0 +1,65 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version name for the release (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4  # Ensuring the use of the latest version
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        tools: composer
+
+    - name: Install Composer dependencies without dev
+      run: composer install --no-dev
+
+    - name: Get version from user input
+      run: |
+        VERSION=${{ github.event.inputs.version }}
+        # Ensure that the version is prefixed with "v" for a valid tag name
+        if [[ $VERSION != v* ]]; then
+          VERSION="v${VERSION}"
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Cleanup unnecessary files
+      run: |
+        rm -f composer.json composer.lock package.json package-lock.json README.md
+
+    - name: Zip the plugin
+      run: |
+        zip -r ai-spam-shield-package.zip . -x "*.git*" -x "*.github*" -x "*.yml" -x "phpunit.xml" -x "tests/**" -x "docs/**"
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1  # Using the latest available stable version
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      with:
+        tag_name: ${{ env.VERSION }}  # Use the validated version tag
+        release_name: AI Spam Shield Plugin ${{ env.VERSION }}
+        body: "Release of AI Spam Shield Plugin version ${{ env.VERSION }}."
+        draft: false
+        prerelease: false
+
+    - name: Upload to Release
+      uses: actions/upload-release-asset@v1  # Using the latest available stable version
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ai-spam-shield-package.zip
+        asset_name: ai-spam-shield-package.zip
+        asset_content_type: application/zip
