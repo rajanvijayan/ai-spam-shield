@@ -9,8 +9,8 @@ class SettingsPage {
 
     public function add_settings_page() {
         add_options_page(
-            'Comment Moderator Settings',
-            'Comment Moderator',
+            'AI Sheld Settings',
+            'AI Sheld',
             'manage_options',
             'ai-comment-moderator',
             [ $this, 'create_settings_page' ]
@@ -31,7 +31,7 @@ class SettingsPage {
     public function create_settings_page() {
         ?>
         <div class="wrap">
-            <h1>Comment Moderator Settings</h1>
+            <h1>AI Sheld Settings</h1>
 
             <!-- Tabs for Basic Settings and API Settings -->
             <h2 class="nav-tab-wrapper">
