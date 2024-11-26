@@ -15,7 +15,6 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 }
 
 use AISpamShield\Admin\SettingsPage;
-use AISpamShield\Cron\SpamCheckCron;
 use AISpamShield\Moderation\CommentModerator;
 use AISpamShield\Spam\EmailValidator;
 
